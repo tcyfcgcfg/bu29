@@ -3,7 +3,7 @@ import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useWalletAddress } from "@/hooks/useTon";
 import { useTonConnectUI } from "@tonconnect/ui-react";
-import { buildOpPayloadBase64, tonToNanoStr, ESCROW_OPS } from "@/lib/ton-escrow";
+import { tonToNanoStr } from "@/lib/ton-escrow";
 
 export default function OfferPage() {
   const { id } = useParams<{ id: string }>();
