@@ -66,11 +66,18 @@ export default function CreateOffer() {
       const makerDeposit = Number(order.makerDeposit || Number(budget));
       if (contractAddr) {
         try {
+          let payload: string | undefined;
+          try {
+            const pr = await fetch(`/api/ton/payload?op=4097`); // 0x1001
+            const pj = await pr.json().catch(() => ({}));
+            payload = pj?.base64;
+          } catch {}
           await tonConnectUI.sendTransaction({
             validUntil: Math.floor(Date.now() / 1000) + 300,
             messages: [
               (() => {
                 const msg: any = { address: contractAddr, amount: tonToNanoStr(makerDeposit) };
+                if (payload) msg.payload = payload;
                 return msg;
               })(),
             ],
