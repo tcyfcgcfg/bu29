@@ -1,16 +1,25 @@
-import { beginCell, toNano } from "@ton/core";
 import { ESCROW_OPS } from "@shared/constants";
 
-export function buildOpPayloadBase64(op: number, opts?: { role?: 1 | 2; what?: number }) {
+export async function buildOpPayloadBase64(op: number, opts?: { role?: 1 | 2; what?: number }): Promise<string | undefined> {
   const role = opts?.role ?? 0;
   const what = opts?.what ?? 0;
-  const cell = beginCell().storeUint(op, 32).storeUint(role, 8).storeUint(what, 8).endCell();
-  // toBoc returns a Buffer (polyfilled in browser by @ton/core)
-  return cell.toBoc().toString("base64");
+  try {
+    const mod: any = await import("@ton/core");
+    const cell = mod.beginCell().storeUint(op, 32).storeUint(role, 8).storeUint(what, 8).endCell();
+    return cell.toBoc().toString("base64");
+  } catch (e) {
+    console.warn("TON core import failed, skipping payload build:", e);
+    return undefined;
+  }
 }
 
-export function tonToNanoStr(ton: number | string) {
-  return toNano(String(ton)).toString();
+export function tonToNanoStr(val: number | string): string {
+  const s = String(val);
+  if (!/^[0-9]+(\.[0-9]+)?$/.test(s)) return "0";
+  const [intPart, fracRaw = ""] = s.split(".");
+  const frac = (fracRaw + "000000000").slice(0, 9);
+  const nano = BigInt(intPart) * BigInt(1_000_000_000) + BigInt(frac || "0");
+  return nano.toString();
 }
 
 export function makerDepositAmount(priceTon: number, nPercent: number) {
