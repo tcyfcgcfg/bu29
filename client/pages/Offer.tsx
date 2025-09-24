@@ -165,7 +165,6 @@ export default function OfferPage() {
                             {
                               address: contractAddr,
                               amount: tonToNanoStr(takerStake),
-                              payload: buildOpPayloadBase64(ESCROW_OPS.TAKE),
                             },
                           ],
                         });
