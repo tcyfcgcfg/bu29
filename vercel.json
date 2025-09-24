@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm run prisma:generate && pnpm prisma db push && pnpm run build:client",
+  "buildCommand": "node scripts/build-vercel.cjs",
   "outputDirectory": "dist/spa",
   "framework": null,
   "rewrites": [
