@@ -69,11 +69,10 @@ export default function CreateOffer() {
           await tonConnectUI.sendTransaction({
             validUntil: Math.floor(Date.now() / 1000) + 300,
             messages: [
-              {
-                address: contractAddr,
-                amount: tonToNanoStr(makerDeposit),
-                payload: buildOpPayloadBase64(ESCROW_OPS.DEPOSIT_MAKER),
-              },
+              (() => {
+                const msg: any = { address: contractAddr, amount: tonToNanoStr(makerDeposit) };
+                return msg;
+              })(),
             ],
           });
         } catch (txErr) {
