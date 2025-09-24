@@ -131,13 +131,20 @@ export default function ChatRoom() {
                       onClick={async () => {
                         try {
                           if (contractAddr) {
+                            let payload: string | undefined;
+                            try {
+                              const pr = await fetch(`/api/ton/payload?op=4099&role=${isMaker ? 1 : 2}`); // 0x1003
+                              const pj = await pr.json().catch(() => ({}));
+                              payload = pj?.base64;
+                            } catch {}
                             await tonConnectUI.sendTransaction({
                               validUntil: Math.floor(Date.now() / 1000) + 300,
                               messages: [
-                                {
-                                  address: contractAddr,
-                                  amount: tonToNanoStr(0),
-                                },
+                                (() => {
+                                  const msg: any = { address: contractAddr, amount: tonToNanoStr(0) };
+                                  if (payload) msg.payload = payload;
+                                  return msg;
+                                })(),
                               ],
                             });
                           }
@@ -162,13 +169,20 @@ export default function ChatRoom() {
                     <Button
                       onClick={async () => {
                         try {
+                          let payload: string | undefined;
+                          try {
+                            const pr = await fetch(`/api/ton/payload?op=4099&role=${me === order.makerAddress ? 1 : 2}`); // 0x1003
+                            const pj = await pr.json().catch(() => ({}));
+                            payload = pj?.base64;
+                          } catch {}
                           await tonConnectUI.sendTransaction({
                             validUntil: Math.floor(Date.now() / 1000) + 300,
                             messages: [
-                              {
-                                address: contractAddr,
-                                amount: tonToNanoStr(0),
-                              },
+                              (() => {
+                                const msg: any = { address: contractAddr, amount: tonToNanoStr(0) };
+                                if (payload) msg.payload = payload;
+                                return msg;
+                              })(),
                             ],
                           });
                           alert("Payout requested on-chain");
