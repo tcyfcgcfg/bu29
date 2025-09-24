@@ -1,9 +1,8 @@
-
 import type { RequestHandler } from "express";
 import { prisma } from "../lib/prisma";
 import { ADMIN_SECRET } from "../config";
 
-const N_PERCENT = 1; // Default commission percent used in calculations
+import { N_PERCENT } from "@shared/constants";
 
 export const listOrders: RequestHandler = async (req, res) => {
   try {
@@ -164,4 +163,3 @@ export const updateOrder: RequestHandler = async (req, res) => {
     res.status(500).json({ error: "internal_error" });
   }
 };
-
