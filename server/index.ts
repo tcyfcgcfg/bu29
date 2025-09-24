@@ -21,6 +21,7 @@ import { PING_MESSAGE, TON_API_BASE, CORS_ORIGIN } from "./config";
 import { resetDatabase } from "./routes/admin";
 import { handleTelegramWebhook } from "./routes/telegram";
 import { ensureSelfChat } from "./routes/chat";
+import { buildPayload } from "./routes/ton";
 
 export function createServer() {
   const app = express();
