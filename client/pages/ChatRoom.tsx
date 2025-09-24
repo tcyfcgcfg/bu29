@@ -4,7 +4,7 @@ import { useWalletAddress } from "@/hooks/useTon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTonConnectUI } from "@tonconnect/ui-react";
-import { buildOpPayloadBase64, tonToNanoStr, ESCROW_OPS } from "@/lib/ton-escrow";
+import { tonToNanoStr } from "@/lib/ton-escrow";
 
 interface Message {
   id: string;
