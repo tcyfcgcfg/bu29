@@ -15,7 +15,6 @@ export const listOrders: RequestHandler = async (req, res) => {
       if (role === "maker") where.makerAddress = address;
       else if (role === "taker") where.takerAddress = address;
       else where.OR = [{ makerAddress: address }, { takerAddress: address }];
-
     }
     const items = await prisma.order.findMany({
       where,
@@ -26,13 +25,11 @@ export const listOrders: RequestHandler = async (req, res) => {
   } catch (e) {
     console.error("listOrders error:", e);
     res.status(500).json({ error: "internal_error" });
-
   }
 };
 
 export const createOrder: RequestHandler = async (req, res) => {
   try {
-
     const {
       title = "",
       makerAddress: makerRaw = "",
@@ -56,7 +53,6 @@ export const createOrder: RequestHandler = async (req, res) => {
 
     const makerDeposit = +(price * (1 + N_PERCENT / 100)).toFixed(9);
     const takerStake = +(price * 0.2).toFixed(9);
-
 
     if (offerId) {
       const existing = await prisma.order.findFirst({

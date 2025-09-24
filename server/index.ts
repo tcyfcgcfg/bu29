@@ -65,7 +65,6 @@ export function createServer() {
   // Chat helpers
   app.post("/api/chat/self", ensureSelfChat);
 
-
   // TON chain
   app.get("/api/ton/info", tonChainInfo);
   app.get("/api/ton/payload", buildPayload);

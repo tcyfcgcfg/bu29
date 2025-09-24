@@ -1,11 +1,19 @@
 import { ESCROW_OPS } from "@shared/constants";
 
-export async function buildOpPayloadBase64(op: number, opts?: { role?: 1 | 2; what?: number }): Promise<string | undefined> {
+export async function buildOpPayloadBase64(
+  op: number,
+  opts?: { role?: 1 | 2; what?: number },
+): Promise<string | undefined> {
   const role = opts?.role ?? 0;
   const what = opts?.what ?? 0;
   try {
     const mod: any = await import("@ton/core");
-    const cell = mod.beginCell().storeUint(op, 32).storeUint(role, 8).storeUint(what, 8).endCell();
+    const cell = mod
+      .beginCell()
+      .storeUint(op, 32)
+      .storeUint(role, 8)
+      .storeUint(what, 8)
+      .endCell();
     return cell.toBoc().toString("base64");
   } catch (e) {
     console.warn("TON core import failed, skipping payload build:", e);

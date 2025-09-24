@@ -12,7 +12,11 @@ export const buildPayload: RequestHandler = async (req, res) => {
     const what = Number(whatRaw) | 0;
     if (!Number.isFinite(op)) return res.status(400).json({ error: "bad_op" });
 
-    const cell = beginCell().storeUint(op, 32).storeUint(role, 8).storeUint(what, 8).endCell();
+    const cell = beginCell()
+      .storeUint(op, 32)
+      .storeUint(role, 8)
+      .storeUint(what, 8)
+      .endCell();
     const base64 = cell.toBoc().toString("base64");
     res.json({ base64 });
   } catch (e: any) {

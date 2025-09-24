@@ -5,7 +5,11 @@ import { useNavigate } from "react-router-dom";
 import WalletGate from "@/components/WalletGate";
 import { useIsWalletConnected, useWalletAddress } from "@/hooks/useTon";
 import { useTonConnectUI } from "@tonconnect/ui-react";
-import { buildOpPayloadBase64, tonToNanoStr, ESCROW_OPS } from "@/lib/ton-escrow";
+import {
+  buildOpPayloadBase64,
+  tonToNanoStr,
+  ESCROW_OPS,
+} from "@/lib/ton-escrow";
 
 export default function CreateOffer() {
   const [title, setTitle] = useState("");
@@ -76,7 +80,10 @@ export default function CreateOffer() {
             validUntil: Math.floor(Date.now() / 1000) + 300,
             messages: [
               (() => {
-                const msg: any = { address: contractAddr, amount: tonToNanoStr(makerDeposit) };
+                const msg: any = {
+                  address: contractAddr,
+                  amount: tonToNanoStr(makerDeposit),
+                };
                 if (payload) msg.payload = payload;
                 return msg;
               })(),
@@ -84,7 +91,9 @@ export default function CreateOffer() {
           });
         } catch (txErr) {
           console.error("Maker deposit tx failed", txErr);
-          alert("TON transaction failed. Offer created, but escrow deposit not sent.");
+          alert(
+            "TON transaction failed. Offer created, but escrow deposit not sent.",
+          );
         }
       } else {
         alert(
@@ -107,7 +116,8 @@ export default function CreateOffer() {
         <h1 className="text-3xl font-bold">Create a New Offer</h1>
         <WalletGate>
           <p className="mt-2 text-white/70">
-            Define the title and budget in TON. On-chain escrow will lock funds from your wallet.
+            Define the title and budget in TON. On-chain escrow will lock funds
+            from your wallet.
           </p>
 
           <div className="mt-6 space-y-4">

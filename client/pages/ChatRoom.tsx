@@ -77,9 +77,15 @@ export default function ChatRoom() {
 
         {order && (
           <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-white/70">
-            <div className="rounded border border-white/10 bg-white/5 px-2 py-1">Status: {order.status}</div>
-            <div className="rounded border border-white/10 bg-white/5 px-2 py-1">Maker: {order.makerConfirmed ? "confirmed" : "pending"}</div>
-            <div className="rounded border border-white/10 bg-white/5 px-2 py-1">Taker: {order.takerConfirmed ? "confirmed" : "pending"}</div>
+            <div className="rounded border border-white/10 bg-white/5 px-2 py-1">
+              Status: {order.status}
+            </div>
+            <div className="rounded border border-white/10 bg-white/5 px-2 py-1">
+              Maker: {order.makerConfirmed ? "confirmed" : "pending"}
+            </div>
+            <div className="rounded border border-white/10 bg-white/5 px-2 py-1">
+              Taker: {order.takerConfirmed ? "confirmed" : "pending"}
+            </div>
           </div>
         )}
 
@@ -120,8 +126,12 @@ export default function ChatRoom() {
             {(() => {
               const isMaker = me === order.makerAddress;
               const isTaker = me === order.takerAddress;
-              const canConfirm = (isMaker && !order.makerConfirmed) || (isTaker && !order.takerConfirmed);
-              const bothConfirmed = Boolean(order.makerConfirmed && order.takerConfirmed);
+              const canConfirm =
+                (isMaker && !order.makerConfirmed) ||
+                (isTaker && !order.takerConfirmed);
+              const bothConfirmed = Boolean(
+                order.makerConfirmed && order.takerConfirmed,
+              );
               const contractAddr = String(order.contractAddr || "");
               return (
                 <>
@@ -133,7 +143,9 @@ export default function ChatRoom() {
                           if (contractAddr) {
                             let payload: string | undefined;
                             try {
-                              const pr = await fetch(`/api/ton/payload?op=4099&role=${isMaker ? 1 : 2}`); // 0x1003
+                              const pr = await fetch(
+                                `/api/ton/payload?op=4099&role=${isMaker ? 1 : 2}`,
+                              ); // 0x1003
                               const pj = await pr.json().catch(() => ({}));
                               payload = pj?.base64;
                             } catch {}
@@ -141,18 +153,27 @@ export default function ChatRoom() {
                               validUntil: Math.floor(Date.now() / 1000) + 300,
                               messages: [
                                 (() => {
-                                  const msg: any = { address: contractAddr, amount: tonToNanoStr(0) };
+                                  const msg: any = {
+                                    address: contractAddr,
+                                    amount: tonToNanoStr(0),
+                                  };
                                   if (payload) msg.payload = payload;
                                   return msg;
                                 })(),
                               ],
                             });
                           }
-                          const r = await fetch(`/api/orders/${encodeURIComponent(order.id)}`, {
-                            method: "PATCH",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ action: "confirm", actor: isMaker ? "maker" : "taker" }),
-                          });
+                          const r = await fetch(
+                            `/api/orders/${encodeURIComponent(order.id)}`,
+                            {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                action: "confirm",
+                                actor: isMaker ? "maker" : "taker",
+                              }),
+                            },
+                          );
                           const j = await r.json();
                           if (!r.ok) throw new Error(j?.error || "failed");
                           await load();
@@ -171,7 +192,9 @@ export default function ChatRoom() {
                         try {
                           let payload: string | undefined;
                           try {
-                            const pr = await fetch(`/api/ton/payload?op=4099&role=${me === order.makerAddress ? 1 : 2}`); // 0x1003
+                            const pr = await fetch(
+                              `/api/ton/payload?op=4099&role=${me === order.makerAddress ? 1 : 2}`,
+                            ); // 0x1003
                             const pj = await pr.json().catch(() => ({}));
                             payload = pj?.base64;
                           } catch {}
@@ -179,7 +202,10 @@ export default function ChatRoom() {
                             validUntil: Math.floor(Date.now() / 1000) + 300,
                             messages: [
                               (() => {
-                                const msg: any = { address: contractAddr, amount: tonToNanoStr(0) };
+                                const msg: any = {
+                                  address: contractAddr,
+                                  amount: tonToNanoStr(0),
+                                };
                                 if (payload) msg.payload = payload;
                                 return msg;
                               })(),

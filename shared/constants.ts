@@ -10,4 +10,4 @@ export const ESCROW_OPS = {
   ADMIN_FORCE: 0x1005,
 } as const;
 
-export type EscrowOpCode = typeof ESCROW_OPS[keyof typeof ESCROW_OPS];
+export type EscrowOpCode = (typeof ESCROW_OPS)[keyof typeof ESCROW_OPS];
