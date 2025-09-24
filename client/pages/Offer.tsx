@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useWalletAddress } from "@/hooks/useTon";
+import { useTonConnectUI } from "@tonconnect/ui-react";
+import { buildOpPayloadBase64, tonToNanoStr, ESCROW_OPS } from "@/lib/ton-escrow";
 
 export default function OfferPage() {
   const { id } = useParams<{ id: string }>();
@@ -10,6 +12,7 @@ export default function OfferPage() {
   const [offer, setOffer] = useState<any>(seed || null);
   const me = useWalletAddress();
   const navigate = useNavigate();
+  const [tonConnectUI] = (useTonConnectUI as any) ? (useTonConnectUI() as any) : [null];
   const [loading, setLoading] = useState(!seed);
   const [error, setError] = useState<string | null>(null);
 
@@ -150,6 +153,29 @@ export default function OfferPage() {
                     if (!r.ok) throw new Error(j?.error || "failed");
                     const orderId = String(j.id || j.order?.id || "");
                     if (!orderId) throw new Error("no_order");
+
+                    // Send taker stake (20%) via TON to escrow contract if available
+                    const contractAddr = String(j.contractAddr || j.order?.contractAddr || "");
+                    const takerStake = Number(j.takerStake || j.order?.takerStake || 0);
+                    if (contractAddr && takerStake > 0 && tonConnectUI) {
+                      try {
+                        await tonConnectUI.sendTransaction({
+                          validUntil: Math.floor(Date.now() / 1000) + 300,
+                          messages: [
+                            {
+                              address: contractAddr,
+                              amount: tonToNanoStr(takerStake),
+                              payload: buildOpPayloadBase64(ESCROW_OPS.TAKE),
+                            },
+                          ],
+                        });
+                      } catch (txErr) {
+                        console.error("Taker stake tx failed", txErr);
+                        alert("TON transaction failed. Stake not sent.");
+                      }
+                    } else if (!contractAddr) {
+                      alert("Escrow contract address is not set. Contact admin to initialize escrow for this offer.");
+                    }
 
                     const rp = await fetch(`/api/orders/${orderId}`, {
                       method: "PATCH",
