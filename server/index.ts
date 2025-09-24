@@ -65,8 +65,10 @@ export function createServer() {
   app.post("/api/chat/self", ensureSelfChat);
 
 
-  // TON chain info proxy
+  // TON chain
   app.get("/api/ton/info", tonChainInfo);
+  const { buildPayload } = await import("./routes/ton");
+  app.get("/api/ton/payload", buildPayload);
 
   // Telegram bot webhook
   app.post("/api/telegram/webhook", handleTelegramWebhook);
