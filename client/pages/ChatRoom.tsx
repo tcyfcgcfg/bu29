@@ -162,15 +162,12 @@ export default function ChatRoom() {
                     <Button
                       onClick={async () => {
                         try {
-                          const isMakerNow = me === order.makerAddress;
-                          const role = isMakerNow ? 1 : 2;
                           await tonConnectUI.sendTransaction({
                             validUntil: Math.floor(Date.now() / 1000) + 300,
                             messages: [
                               {
                                 address: contractAddr,
                                 amount: tonToNanoStr(0),
-                                payload: buildOpPayloadBase64(ESCROW_OPS.CONFIRM, { role }),
                               },
                             ],
                           });
