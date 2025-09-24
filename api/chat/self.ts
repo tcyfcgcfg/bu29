@@ -14,7 +14,9 @@ export default async function handler(req: any, res: any) {
 
   try {
     const body =
-      typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
+      typeof req.body === "string"
+        ? JSON.parse(req.body || "{}")
+        : req.body || {};
     const address = String(body?.address || req.query?.address || "").trim();
     if (!address) return res.status(400).json({ error: "address_required" });
 

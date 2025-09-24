@@ -154,7 +154,10 @@ export default function OfferPage() {
                     const rp = await fetch(`/api/orders/${orderId}`, {
                       method: "PATCH",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ action: "take", takerAddress: me }),
+                      body: JSON.stringify({
+                        action: "take",
+                        takerAddress: me,
+                      }),
                     });
                     const jp = await rp.json();
                     if (!rp.ok) throw new Error(jp?.error || "failed");
