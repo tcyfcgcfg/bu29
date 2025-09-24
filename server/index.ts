@@ -68,7 +68,6 @@ export function createServer() {
 
   // TON chain
   app.get("/api/ton/info", tonChainInfo);
-  const { buildPayload } = await import("./routes/ton");
   app.get("/api/ton/payload", buildPayload);
 
   // Telegram bot webhook
