@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import WalletGate from "@/components/WalletGate";
 import { useIsWalletConnected, useWalletAddress } from "@/hooks/useTon";
+import { useTonConnectUI } from "@tonconnect/ui-react";
+import { buildOpPayloadBase64, tonToNanoStr, ESCROW_OPS } from "@/lib/ton-escrow";
 
 export default function CreateOffer() {
   const [title, setTitle] = useState("");
@@ -14,6 +16,7 @@ export default function CreateOffer() {
   const navigate = useNavigate();
   const connected = useIsWalletConnected();
   const address = useWalletAddress();
+  const [tonConnectUI] = useTonConnectUI();
 
   useEffect(() => {
     if (connected && address) {
@@ -44,6 +47,45 @@ export default function CreateOffer() {
         }),
       });
       if (!r.ok) throw new Error("Failed to create offer");
+      const offer = await r.json();
+
+      const ro = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          makerAddress: address,
+          priceTON: Number(budget),
+          offerId: String(offer.id || ""),
+        }),
+      });
+      const order = await ro.json();
+      if (!ro.ok) throw new Error(order?.error || "Failed to create order");
+
+      const contractAddr = String(order.contractAddr || "");
+      const makerDeposit = Number(order.makerDeposit || Number(budget));
+      if (contractAddr) {
+        try {
+          await tonConnectUI.sendTransaction({
+            validUntil: Math.floor(Date.now() / 1000) + 300,
+            messages: [
+              {
+                address: contractAddr,
+                amount: tonToNanoStr(makerDeposit),
+                payload: buildOpPayloadBase64(ESCROW_OPS.DEPOSIT_MAKER),
+              },
+            ],
+          });
+        } catch (txErr) {
+          console.error("Maker deposit tx failed", txErr);
+          alert("TON transaction failed. Offer created, but escrow deposit not sent.");
+        }
+      } else {
+        alert(
+          "Offer created. Escrow contract is not configured yet (no contract address). Please initialize escrow before accepting takers.",
+        );
+      }
+
       navigate("/take");
     } catch (e) {
       console.error(e);
@@ -59,8 +101,7 @@ export default function CreateOffer() {
         <h1 className="text-3xl font-bold">Create a New Offer</h1>
         <WalletGate>
           <p className="mt-2 text-white/70">
-            Define the title and budget in TON. Escrow and on-chain actions
-            подключим позже.
+            Define the title and budget in TON. On-chain escrow will lock funds from your wallet.
           </p>
 
           <div className="mt-6 space-y-4">
