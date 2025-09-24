@@ -159,13 +159,20 @@ export default function OfferPage() {
                     const takerStake = Number(j.takerStake || j.order?.takerStake || 0);
                     if (contractAddr && takerStake > 0 && tonConnectUI) {
                       try {
+                        let payload: string | undefined;
+                        try {
+                          const pr = await fetch(`/api/ton/payload?op=4098`); // 0x1002
+                          const pj = await pr.json().catch(() => ({}));
+                          payload = pj?.base64;
+                        } catch {}
                         await tonConnectUI.sendTransaction({
                           validUntil: Math.floor(Date.now() / 1000) + 300,
                           messages: [
-                            {
-                              address: contractAddr,
-                              amount: tonToNanoStr(takerStake),
-                            },
+                            (() => {
+                              const msg: any = { address: contractAddr, amount: tonToNanoStr(takerStake) };
+                              if (payload) msg.payload = payload;
+                              return msg;
+                            })(),
                           ],
                         });
                       } catch (txErr) {
