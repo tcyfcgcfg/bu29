@@ -127,6 +127,49 @@ export default function OfferPage() {
               >
                 Message Maker
               </Button>
+              <Button
+                variant="secondary"
+                onClick={async () => {
+                  try {
+                    if (!me) {
+                      alert("Connect wallet to take the offer");
+                      return;
+                    }
+                    const maker = String(offer?.makerAddress || "");
+                    const r = await fetch("/api/orders", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        title: String(offer?.title || "Order"),
+                        makerAddress: maker,
+                        priceTON: Number(offer?.budgetTON || 0),
+                        offerId: String(offer?.id || id || ""),
+                      }),
+                    });
+                    const j = await r.json();
+                    if (!r.ok) throw new Error(j?.error || "failed");
+                    const orderId = String(j.id || j.order?.id || "");
+                    if (!orderId) throw new Error("no_order");
+
+                    const rp = await fetch(`/api/orders/${orderId}`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        action: "take",
+                        takerAddress: me,
+                      }),
+                    });
+                    const jp = await rp.json();
+                    if (!rp.ok) throw new Error(jp?.error || "failed");
+
+                    navigate(`/chat/${orderId}`);
+                  } catch (_e) {
+                    alert("Unable to take offer");
+                  }
+                }}
+              >
+                Take Offer
+              </Button>
             </div>
           </div>
         )}
