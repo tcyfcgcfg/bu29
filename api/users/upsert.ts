@@ -1,11 +1,6 @@
 import pkg from "@prisma/client";
-const { PrismaClient } = pkg;
+import { prisma } from "../_prisma";
 import { Address } from "@ton/core";
-const globalForPrisma = globalThis as unknown as {
-  prisma?: InstanceType<typeof PrismaClient>;
-};
-const prisma = globalForPrisma.prisma || new PrismaClient();
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 export default async function handler(req: any, res: any) {
   res.setHeader("Access-Control-Allow-Origin", "*");
