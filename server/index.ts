@@ -21,7 +21,7 @@ import { PING_MESSAGE, TON_API_BASE, CORS_ORIGIN } from "./config";
 import { resetDatabase } from "./routes/admin";
 import { handleTelegramWebhook } from "./routes/telegram";
 import { ensureSelfChat } from "./routes/chat";
-import { buildPayload } from "./routes/ton";
+import { buildPayload, manifest } from "./routes/ton";
 
 export function createServer() {
   const app = express();
@@ -68,7 +68,6 @@ export function createServer() {
   // TON chain
   app.get("/api/ton/info", tonChainInfo);
   app.get("/api/ton/payload", buildPayload);
-  const { manifest } = await import("./routes/ton");
   app.get("/api/ton/manifest", manifest);
   app.get("/tonconnect-manifest.json", manifest);
 
@@ -78,35 +77,6 @@ export function createServer() {
   // Admin
   app.post("/api/admin/reset", resetDatabase);
 
-  // Serve TonConnect manifest with CORS to satisfy wallets
-  app.get("/tonconnect-manifest.json", async (req, res) => {
-    try {
-      const base = `${req.protocol}://${req.get("host")}`;
-      const origin = base.replace(/\/$/, "");
-      const tonServer = (TON_API_BASE || "").replace(/\/$/, "");
-
-      const manifest = {
-        manifestVersion: "1.1",
-        url: base,
-        name: "FreelTON",
-        iconUrl: `${base}/placeholder.svg`,
-        termsOfUseUrl: `${base}/terms`,
-        privacyPolicyUrl: `${base}/privacy`,
-        ton: {
-          default: {
-            name: "TON",
-            description: "TON blockchain",
-            servers: [{ name: "tonapi", url: tonServer }],
-          },
-        },
-      };
-      res.setHeader("Content-Type", "application/json; charset=utf-8");
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.json(manifest);
-    } catch (e) {
-      res.status(500).json({ error: "manifest build error" });
-    }
-  });
 
   // Serve placeholder icon with CORS
   app.get("/placeholder.svg", async (_req, res) => {
