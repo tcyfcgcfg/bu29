@@ -38,6 +38,7 @@ export const manifest: RequestHandler = async (req, res) => {
       privacyPolicyUrl: `${baseNoSlash}/privacy`,
     };
     res.setHeader("content-type", "application/json; charset=utf-8");
+    res.setHeader("Access-Control-Allow-Origin", "*");
     res.status(200).send(JSON.stringify(json));
   } catch (e) {
     res.status(500).json({ error: "internal_error" });
