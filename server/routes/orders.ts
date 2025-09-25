@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 import { prisma } from "../lib/prisma";
 import { ADMIN_SECRET } from "../config";
 
-import { N_PERCENT } from "@shared/constants";
+import { N_PERCENT } from "../../shared/constants";
 
 export const listOrders: RequestHandler = async (req, res) => {
   try {
