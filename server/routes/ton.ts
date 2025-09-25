@@ -28,7 +28,9 @@ export const buildPayload: RequestHandler = async (req, res) => {
 
 export const manifest: RequestHandler = async (req, res) => {
   try {
-    const base = (APP_BASE_URL && APP_BASE_URL.trim()) || `${req.protocol}://${req.get("host")}`;
+    const base =
+      (APP_BASE_URL && APP_BASE_URL.trim()) ||
+      `${req.protocol}://${req.get("host")}`;
     const baseNoSlash = base.replace(/\/$/, "");
     const json = {
       url: baseNoSlash,

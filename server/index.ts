@@ -77,7 +77,6 @@ export function createServer() {
   // Admin
   app.post("/api/admin/reset", resetDatabase);
 
-
   // Serve placeholder icon with CORS
   app.get("/placeholder.svg", async (_req, res) => {
     try {
