@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 import { beginCell } from "@ton/core";
+import { APP_BASE_URL } from "../config";
 
 export const buildPayload: RequestHandler = async (req, res) => {
   try {
@@ -21,6 +22,24 @@ export const buildPayload: RequestHandler = async (req, res) => {
     res.json({ base64 });
   } catch (e: any) {
     console.error("buildPayload error:", e);
+    res.status(500).json({ error: "internal_error" });
+  }
+};
+
+export const manifest: RequestHandler = async (req, res) => {
+  try {
+    const base = (APP_BASE_URL && APP_BASE_URL.trim()) || `${req.protocol}://${req.get("host")}`;
+    const baseNoSlash = base.replace(/\/$/, "");
+    const json = {
+      url: baseNoSlash,
+      name: "FreelTON",
+      iconUrl: `${baseNoSlash}/placeholder.svg`,
+      termsOfUseUrl: `${baseNoSlash}/terms`,
+      privacyPolicyUrl: `${baseNoSlash}/privacy`,
+    };
+    res.setHeader("content-type", "application/json; charset=utf-8");
+    res.status(200).send(JSON.stringify(json));
+  } catch (e) {
     res.status(500).json({ error: "internal_error" });
   }
 };
