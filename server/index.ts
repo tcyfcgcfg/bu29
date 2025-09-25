@@ -68,6 +68,9 @@ export function createServer() {
   // TON chain
   app.get("/api/ton/info", tonChainInfo);
   app.get("/api/ton/payload", buildPayload);
+  const { manifest } = await import("./routes/ton");
+  app.get("/api/ton/manifest", manifest);
+  app.get("/tonconnect-manifest.json", manifest);
 
   // Telegram bot webhook
   app.post("/api/telegram/webhook", handleTelegramWebhook);
