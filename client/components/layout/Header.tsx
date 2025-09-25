@@ -43,10 +43,12 @@ function UpsertOnConnect() {
 }
 
 export default function Header({ children }: { children?: React.ReactNode }) {
-  const manifestUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/tonconnect-manifest.json`
-      : "/tonconnect-manifest.json";
+  const baseFromEnv = (typeof __APP_BASE_URL__ !== "undefined" && __APP_BASE_URL__) || "";
+  const manifestUrl = typeof window !== "undefined"
+    ? (baseFromEnv
+        ? `${baseFromEnv.replace(/\/$/, "")}/tonconnect-manifest.json`
+        : `${window.location.origin}/api/ton/manifest`)
+    : "/tonconnect-manifest.json";
 
   const { isAndroid } = useTelegramPlatform();
   const topOffsetClass = isAndroid ? "mt-[69px] sm:mt-[60px]" : "mt-0";
