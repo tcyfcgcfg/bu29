@@ -1,4 +1,3 @@
-import pkg from "@prisma/client";
 import { prisma } from "../_prisma";
 import { Address } from "@ton/core";
 
