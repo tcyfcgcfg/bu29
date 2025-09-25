@@ -24,11 +24,13 @@ try {
     jobs: new Map<string, any>(),
   };
 
-  const genId = (p: string) => `${p}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const genId = (p: string) =>
+    `${p}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   prisma = {
     user: {
-      findUnique: async (opts: any) => mockStorage.users.get(opts?.where?.address) || null,
+      findUnique: async (opts: any) =>
+        mockStorage.users.get(opts?.where?.address) || null,
       upsert: async (opts: any) => {
         const addr = String(opts?.where?.address || "");
         const existing = mockStorage.users.get(addr);
@@ -70,7 +72,8 @@ try {
         }
         return arr;
       },
-      findUnique: async (opts: any) => mockStorage.offers.get(opts?.where?.id) || null,
+      findUnique: async (opts: any) =>
+        mockStorage.offers.get(opts?.where?.id) || null,
       create: async (opts: any) => {
         const rec = {
           id: genId("offer"),
@@ -98,9 +101,12 @@ try {
             if (w.makerAddress) ok &&= o.makerAddress === w.makerAddress;
             if (w.takerAddress) ok &&= o.takerAddress === w.takerAddress;
             if (Array.isArray(w.OR)) {
-              ok &&= w.OR.some((r: any) =>
-                (!r.makerAddress || r.makerAddress === o.makerAddress) ||
-                (!r.takerAddress || r.takerAddress === o.takerAddress),
+              ok &&= w.OR.some(
+                (r: any) =>
+                  !r.makerAddress ||
+                  r.makerAddress === o.makerAddress ||
+                  !r.takerAddress ||
+                  r.takerAddress === o.takerAddress,
               );
             }
             return ok;
@@ -115,7 +121,8 @@ try {
         const arr = await prisma.order.findMany({ where: opts?.where });
         return arr[0] || null;
       },
-      findUnique: async (opts: any) => mockStorage.orders.get(opts?.where?.id) || null,
+      findUnique: async (opts: any) =>
+        mockStorage.orders.get(opts?.where?.id) || null,
       create: async (opts: any) => {
         const rec = {
           id: genId("order"),
@@ -153,7 +160,9 @@ try {
     message: {
       findMany: async (opts: any = {}) => {
         const orderId = opts?.where?.orderId;
-        const arr = Array.from(mockStorage.messages.values()).filter((m) => !orderId || m.orderId === orderId);
+        const arr = Array.from(mockStorage.messages.values()).filter(
+          (m) => !orderId || m.orderId === orderId,
+        );
         arr.sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt));
         return arr;
       },
@@ -171,7 +180,9 @@ try {
       deleteMany: async () => ({ count: (mockStorage.messages.clear(), 0) }),
     },
 
-    review: { deleteMany: async () => ({ count: (mockStorage.reviews.clear(), 0) }) },
+    review: {
+      deleteMany: async () => ({ count: (mockStorage.reviews.clear(), 0) }),
+    },
     job: { deleteMany: async () => ({ count: (mockStorage.jobs.clear(), 0) }) },
 
     $transaction: async (ops: any[]) => Promise.all(ops),
