@@ -1,4 +1,3 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "./_prisma";
 import { N_PERCENT } from "./_config";
 
