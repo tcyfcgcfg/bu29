@@ -78,11 +78,8 @@ export default function Header({ children }: { children?: React.ReactNode }) {
           >
             FreelTON
           </Link>
-          <div className="w-fit text-right">
+          <div className="w-fit">
             <TonConnectButton className="[&_*]:!font-medium" />
-            <div className="mt-0.5 text-[10px] text-white/50">
-              {(baseFromEnv && baseFromEnv.replace(/\/$/, "")) || (typeof window !== "undefined" ? window.location.origin : "")}
-            </div>
           </div>
         </div>
       </header>
