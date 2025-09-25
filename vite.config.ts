@@ -23,6 +23,9 @@ export default defineConfig(() => ({
       "@shared": path.resolve(__dirname, "./shared"),
     },
   },
+  define: {
+    __APP_BASE_URL__: JSON.stringify(process.env.APP_BASE_URL || ""),
+  },
 }));
 
 function expressPlugin(): Plugin {
