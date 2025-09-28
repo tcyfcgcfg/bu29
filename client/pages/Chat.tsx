@@ -103,7 +103,8 @@ export default function Chat() {
       const jj = await rr.json().catch(() => ({}));
       const list = (jj.items || []) as any[];
       const found = list.find(
-        (o: any) => String(o.makerAddress) === addr && String(o.takerAddress) === addr,
+        (o: any) =>
+          String(o.makerAddress) === addr && String(o.takerAddress) === addr,
       );
       if (found?.id) {
         navigate(`/chat/${String(found.id)}?peer=${encodeURIComponent(addr)}`);
@@ -111,7 +112,9 @@ export default function Chat() {
       }
     } catch {}
 
-    alert("Не удалось открыть Favorites. Подключите кошелек и попробуйте снова.");
+    alert(
+      "Не удалось открыть Favorites. Подключите кошелек и попробуйте снова.",
+    );
   }
 
   function openChat(o: Order) {
