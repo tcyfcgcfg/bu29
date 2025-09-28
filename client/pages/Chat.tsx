@@ -74,14 +74,47 @@ export default function Chat() {
 
   async function openSelfChat() {
     if (!addr) return;
-    const r = await fetch(`/api/chat/self`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ address: addr }),
-    });
-    const j = await r.json().catch(() => ({}));
-    const id = String(j?.order?.id || "");
-    if (id) navigate(`/chat/${id}?peer=${encodeURIComponent(addr)}`);
+    try {
+      const r = await fetch(`/api/chat/self`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: addr }),
+      });
+      const j = await r.json().catch(() => ({}));
+      const id = String(j?.order?.id || "");
+      if (id) {
+        navigate(`/chat/${id}?peer=${encodeURIComponent(addr)}`);
+        return;
+      }
+    } catch {}
+
+    const localSelf = items.find(
+      (i) => i.makerAddress === addr && i.takerAddress === addr,
+    );
+    if (localSelf) {
+      navigate(`/chat/${localSelf.id}?peer=${encodeURIComponent(addr)}`);
+      return;
+    }
+
+    try {
+      const rr = await fetch(
+        `/api/orders?address=${encodeURIComponent(addr)}&role=any`,
+      );
+      const jj = await rr.json().catch(() => ({}));
+      const list = (jj.items || []) as any[];
+      const found = list.find(
+        (o: any) =>
+          String(o.makerAddress) === addr && String(o.takerAddress) === addr,
+      );
+      if (found?.id) {
+        navigate(`/chat/${String(found.id)}?peer=${encodeURIComponent(addr)}`);
+        return;
+      }
+    } catch {}
+
+    alert(
+      "Не удалось открыть Favorites. Подключите кошелек и попробуйте снова.",
+    );
   }
 
   function openChat(o: Order) {
