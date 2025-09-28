@@ -17,9 +17,6 @@ export const getOfferById: RequestHandler = async (req, res) => {
         createdAt: true,
 
         creator: { select: { address: true } },
-
-        makerAddress: true,
-
       },
     });
     if (!offerRaw) return res.status(404).json({ error: "not_found" });
@@ -43,8 +40,17 @@ export const listOffers: RequestHandler = async (req, res) => {
   try {
     const qRaw = String((req.query?.q as string) || "").trim();
     const stackRaw = String((req.query?.stack as string) || "").trim();
-    const minBudget = Number((req.query?.minBudget as string) || "");
-    const maxBudget = Number((req.query?.maxBudget as string) || "");
+    const minBudgetRaw = req.query?.minBudget as string | undefined;
+    const maxBudgetRaw = req.query?.maxBudget as string | undefined;
+
+    const minBudget =
+      minBudgetRaw !== undefined && minBudgetRaw !== ""
+        ? Number(minBudgetRaw)
+        : undefined;
+    const maxBudget =
+      maxBudgetRaw !== undefined && maxBudgetRaw !== ""
+        ? Number(maxBudgetRaw)
+        : undefined;
 
     const tokens = [
       ...(qRaw ? qRaw.split(/\s+/).filter(Boolean) : []),
@@ -64,10 +70,10 @@ export const listOffers: RequestHandler = async (req, res) => {
       );
     }
 
-    if (!Number.isNaN(minBudget)) {
+    if (minBudget !== undefined && Number.isFinite(minBudget)) {
       filters.push({ budgetTON: { gte: minBudget } });
     }
-    if (!Number.isNaN(maxBudget)) {
+    if (maxBudget !== undefined && Number.isFinite(maxBudget)) {
       filters.push({ budgetTON: { lte: maxBudget } });
     }
 
