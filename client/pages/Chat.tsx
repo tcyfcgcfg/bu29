@@ -112,7 +112,9 @@ export default function Chat() {
                 <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/10 p-3">
                   <div>
                     <div className="font-medium truncate">Favorites</div>
-                    <div className="text-xs text-white/60 mt-1">Private notes</div>
+                    <div className="text-xs text-white/60 mt-1">
+                      Private notes
+                    </div>
                   </div>
                   <Button
                     onClick={openSelfChat}
