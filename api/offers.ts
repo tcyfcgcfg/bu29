@@ -17,7 +17,8 @@ export default async function handler(req: any, res: any) {
       try {
         const qObj = (req?.query || {}) as any;
         if (typeof qObj.q === "string") q = String(qObj.q || "").trim();
-        if (typeof qObj.stack === "string") stack = String(qObj.stack || "").trim();
+        if (typeof qObj.stack === "string")
+          stack = String(qObj.stack || "").trim();
         if (typeof qObj.minBudget === "string" && qObj.minBudget !== "") {
           const n = Number(qObj.minBudget);
           if (Number.isFinite(n)) minBudget = n;
@@ -28,7 +29,7 @@ export default async function handler(req: any, res: any) {
         }
       } catch {}
 
-      if (!q && !stack && (minBudget === undefined && maxBudget === undefined)) {
+      if (!q && !stack && minBudget === undefined && maxBudget === undefined) {
         try {
           const base = `${req.headers?.["x-forwarded-proto"] || "https"}://${req.headers?.host || "localhost"}`;
           const raw = (req as any).originalUrl || req.url || base;
