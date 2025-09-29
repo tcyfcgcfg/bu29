@@ -70,7 +70,7 @@ export default async function handler(req: any, res: any) {
               { title: { contains: t, mode: "insensitive" as const } },
               { description: { contains: t, mode: "insensitive" as const } },
             ],
-          }))
+          })),
         );
       }
       if (minBudget !== undefined && Number.isFinite(minBudget)) {
@@ -111,8 +111,16 @@ export default async function handler(req: any, res: any) {
 
     if (req.method === "POST") {
       const body =
-        typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
-      const { title, description = "", budgetTON, makerAddress = "", stack = "" } = body;
+        typeof req.body === "string"
+          ? JSON.parse(req.body || "{}")
+          : req.body || {};
+      const {
+        title,
+        description = "",
+        budgetTON,
+        makerAddress = "",
+        stack = "",
+      } = body;
       if (!title || typeof budgetTON !== "number" || budgetTON < 0) {
         return res.status(400).json({ error: "invalid_payload" });
       }
@@ -128,9 +136,17 @@ export default async function handler(req: any, res: any) {
         creatorId = user.id;
       }
 
-      const desc = stack ? `${description}\n\nStack: ${String(stack)}` : description;
+      const desc = stack
+        ? `${description}\n\nStack: ${String(stack)}`
+        : description;
       const created = await prisma.offer.create({
-        data: { title, description: desc, budgetTON, status: "open", creatorId },
+        data: {
+          title,
+          description: desc,
+          budgetTON,
+          status: "open",
+          creatorId,
+        },
         select: {
           id: true,
           title: true,
