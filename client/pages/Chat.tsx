@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useWalletAddress } from "@/hooks/useTon";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 interface Order {
   id: string;
@@ -15,6 +16,7 @@ export default function Chat() {
   const addr = useWalletAddress();
   const [items, setItems] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!addr) return;
@@ -22,7 +24,6 @@ export default function Chat() {
     async function run() {
       try {
         setLoading(true);
-        // Ensure a self-chat (Favorites) exists
         await fetch(`/api/chat/self`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -64,6 +65,64 @@ export default function Chat() {
     return { inProgress, completed };
   }, [items]);
 
+  function getPeerForOrder(o: Order, me?: string | null) {
+    const maker = o.makerAddress;
+    const taker = o.takerAddress || "";
+    if (!me) return maker || taker;
+    return me === maker ? taker : maker;
+  }
+
+  async function openSelfChat() {
+    if (!addr) return;
+    try {
+      const r = await fetch(`/api/chat/self`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: addr }),
+      });
+      const j = await r.json().catch(() => ({}));
+      const id = String(j?.order?.id || "");
+      if (id) {
+        navigate(`/chat/${id}?peer=${encodeURIComponent(addr)}`);
+        return;
+      }
+    } catch {}
+
+    const localSelf = items.find(
+      (i) => i.makerAddress === addr && i.takerAddress === addr,
+    );
+    if (localSelf) {
+      navigate(`/chat/${localSelf.id}?peer=${encodeURIComponent(addr)}`);
+      return;
+    }
+
+    try {
+      const rr = await fetch(
+        `/api/orders?address=${encodeURIComponent(addr)}&role=any`,
+      );
+      const jj = await rr.json().catch(() => ({}));
+      const list = (jj.items || []) as any[];
+      const found = list.find(
+        (o: any) =>
+          String(o.makerAddress) === addr && String(o.takerAddress) === addr,
+      );
+      if (found?.id) {
+        navigate(`/chat/${String(found.id)}?peer=${encodeURIComponent(addr)}`);
+        return;
+      }
+    } catch {}
+
+    alert(
+      "Не удалось открыть Favorites. Подключите кошелек и попробуйте снова.",
+    );
+  }
+
+  function openChat(o: Order) {
+    const peer = getPeerForOrder(o, addr);
+    const url = `/chat/${o.id}${peer ? `?peer=${encodeURIComponent(peer)}` : ""}`;
+    navigate(url);
+  }
+
   return (
     <div className="min-h-screen bg-[hsl(217,33%,9%)] text-white">
       <div className="mx-auto w-full max-w-2xl px-4 py-10">
@@ -82,22 +141,21 @@ export default function Chat() {
               In Progress
             </h2>
             <div className="mt-2 space-y-2">
-              {/* Favorites self chat shortcut */}
               {addr && (
-                <Link
-                  to={(() => {
-                    const self = items.find(
-                      (i) => i.makerAddress === addr && i.takerAddress === addr,
-                    );
-                    return `/chat/${self ? self.id : ""}`;
-                  })()}
-                  className="block rounded-lg border border-white/10 bg-white/10 p-3 hover:bg-white/20"
-                >
-                  <div className="font-medium truncate">Favorites</div>
-                  <div className="text-xs text-white/60 mt-1">
-                    Private notes
+                <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/10 p-3">
+                  <div>
+                    <div className="font-medium truncate">Favorites</div>
+                    <div className="text-xs text-white/60 mt-1">
+                      Private notes
+                    </div>
                   </div>
-                </Link>
+                  <Button
+                    onClick={openSelfChat}
+                    className="bg-primary text-primary-foreground"
+                  >
+                    Favorites
+                  </Button>
+                </div>
               )}
 
               {sections.inProgress.length === 0 && (
@@ -106,16 +164,26 @@ export default function Chat() {
                 </div>
               )}
               {sections.inProgress.map((o) => (
-                <Link
+                <div
                   key={o.id}
-                  to={`/chat/${o.id}`}
-                  className="block rounded-lg border border-white/10 bg-white/5 p-3 hover:bg-white/10"
+                  className="rounded-lg border border-white/10 bg-white/5 p-3 hover:bg-white/10"
                 >
-                  <div className="font-medium truncate">{o.title}</div>
-                  <div className="text-xs text-white/60 mt-1">
-                    {o.status} • {new Date(o.createdAt).toLocaleString()}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium truncate">{o.title}</div>
+                      <div className="text-xs text-white/60 mt-1">
+                        {o.status} • {new Date(o.createdAt).toLocaleString()}
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => openChat(o)}
+                      className="bg-primary text-primary-foreground"
+                    >
+                      Chat
+                    </Button>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
 
@@ -129,16 +197,26 @@ export default function Chat() {
                 </div>
               )}
               {sections.completed.map((o) => (
-                <Link
+                <div
                   key={o.id}
-                  to={`/chat/${o.id}`}
-                  className="block rounded-lg border border-white/10 bg-white/5 p-3 hover:bg-white/10"
+                  className="rounded-lg border border-white/10 bg-white/5 p-3 hover:bg-white/10"
                 >
-                  <div className="font-medium truncate">{o.title}</div>
-                  <div className="text-xs text-white/60 mt-1">
-                    completed • {new Date(o.createdAt).toLocaleString()}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium truncate">{o.title}</div>
+                      <div className="text-xs text-white/60 mt-1">
+                        completed • {new Date(o.createdAt).toLocaleString()}
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => openChat(o)}
+                      className="bg-primary text-primary-foreground"
+                    >
+                      Chat
+                    </Button>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           </>

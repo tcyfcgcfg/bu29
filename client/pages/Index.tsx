@@ -84,12 +84,27 @@ export default function Index() {
         if (stack) params.set("stack", stack);
         if (minBudget) params.set("minBudget", minBudget);
         if (maxBudget) params.set("maxBudget", maxBudget);
-        const r = await fetch(
+
+        const base =
+          typeof window !== "undefined" ? window.location.origin : "";
+        const paths = [
           `/api/offers${params.size ? `?${params.toString()}` : ""}`,
-          { signal: ctrl.signal },
-        );
-        if (!r.ok) throw new Error(`Failed: ${r.status}`);
-        const json = await r.json();
+          `${base}/api/offers${params.size ? `?${params.toString()}` : ""}`,
+        ];
+
+        let json: any = null;
+        for (const url of paths) {
+          try {
+            const r = await fetch(url, { signal: ctrl.signal });
+            if (!r.ok) continue;
+            json = await r.json().catch(() => null);
+            if (json) break;
+          } catch (_) {
+            // try next
+          }
+        }
+        if (!json) throw new Error("Network error while loading offers");
+
         if (!mounted) return;
         setOffers(
           (json.items || []).map((d: any) => ({
@@ -156,7 +171,11 @@ export default function Index() {
             onClick={() => setShowFilters((v) => !v)}
             className="absolute right-2 top-1/2 -translate-y-1/2 grid place-items-center rounded-md p-2 text-white/80 hover:bg-white/10"
           >
-            {showFilters ? <X className="size-4" /> : <Settings className="size-4" />}
+            {showFilters ? (
+              <X className="size-4" />
+            ) : (
+              <Settings className="size-4" />
+            )}
           </button>
         </div>
 
