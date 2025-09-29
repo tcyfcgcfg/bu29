@@ -1,7 +1,9 @@
 {
+
   "url": "https://freelali.vercel.app/",
   "name": "FreelTON",
   "iconUrl": "https://freelali.vercel.app/api/icon.png",
+
   "termsOfUseUrl": "https://freelali.vercel.app/terms",
   "privacyPolicyUrl": "https://freelali.vercel.app/privacy"
 }
