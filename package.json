@@ -15,7 +15,7 @@
     "dev": "vite",
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
-    "build:server": "vite build --config vite.config.server.ts",
+    "build:server": "tsc --outDir dist && vite build --config vite.config.server.ts",
     "prestart": "npm run build",
     "start": "node dist/server/node-build.mjs",
     "test": "vitest --run",
