@@ -32,7 +32,11 @@ function generateId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-type SelectShape = Record<string, boolean | SelectShape> | undefined;
+interface SelectTree {
+  [key: string]: boolean | SelectTree | { select?: SelectTree };
+}
+
+type SelectShape = SelectTree | undefined;
 
 type OrderWhere = {
   id?: string;
@@ -293,5 +297,3 @@ export const mockPrisma = {
     },
   },
 };
-
-export { mockPrisma };
