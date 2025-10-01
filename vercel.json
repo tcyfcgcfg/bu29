@@ -1,6 +1,6 @@
 {
   "buildCommand": "node scripts/build-vercel.cjs",
-  "outputDirectory": "dist/spa",
+  "outputDirectory": "dist",
   "framework": null,
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
