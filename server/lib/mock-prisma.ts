@@ -46,17 +46,27 @@ type OrderWhere = {
 
 function applySelect<T extends Record<string, any>>(item: T, select?: SelectShape) {
   if (!select) return { ...item };
+
+  if (
+    typeof select === "object" &&
+    select !== null &&
+    Object.prototype.hasOwnProperty.call(select, "select")
+  ) {
+    return applySelect(item, (select as Record<string, any>).select as SelectShape);
+  }
+
   const result: Record<string, any> = {};
   for (const [key, value] of Object.entries(select)) {
     if (!value) continue;
     if (typeof value === "object" && value) {
-      if (item[key] && typeof item[key] === "object") {
-        result[key] = applySelect(item[key], value as SelectShape);
+      const nested = item[key as keyof T];
+      if (nested && typeof nested === "object") {
+        result[key] = applySelect(nested as Record<string, any>, value as SelectShape);
       }
       continue;
     }
     if (key in item) {
-      result[key] = item[key];
+      result[key] = item[key as keyof T];
     }
   }
   return result;
