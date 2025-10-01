@@ -66,17 +66,31 @@ function matchesWhere(order: MockOrder, where?: OrderWhere): boolean {
   if (!where) return true;
 
   if (where.OR && Array.isArray(where.OR)) {
-    return where.OR.some((clause) => matchesWhere(order, clause));
+    const orMatches = where.OR.some((clause) => matchesWhere(order, clause));
+    if (!orMatches) return false;
   }
 
   if (where.AND && Array.isArray(where.AND)) {
-    return where.AND.every((clause) => matchesWhere(order, clause));
+    const andMatches = where.AND.every((clause) => matchesWhere(order, clause));
+    if (!andMatches) return false;
   }
 
-  if (where.id && order.id !== where.id) return false;
-  if (where.offerId && order.offerId !== where.offerId) return false;
-  if (where.status && order.status !== where.status) return false;
-  if (where.makerAddress && order.makerAddress !== where.makerAddress)
+  if (Object.prototype.hasOwnProperty.call(where, "id") && order.id !== where.id)
+    return false;
+  if (
+    Object.prototype.hasOwnProperty.call(where, "offerId") &&
+    order.offerId !== where.offerId
+  )
+    return false;
+  if (
+    Object.prototype.hasOwnProperty.call(where, "status") &&
+    order.status !== where.status
+  )
+    return false;
+  if (
+    Object.prototype.hasOwnProperty.call(where, "makerAddress") &&
+    order.makerAddress !== where.makerAddress
+  )
     return false;
   if (
     Object.prototype.hasOwnProperty.call(where, "takerAddress") &&
