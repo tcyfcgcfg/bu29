@@ -48,7 +48,10 @@ type OrderWhere = {
   AND?: OrderWhere[];
 };
 
-function applySelect<T extends Record<string, any>>(item: T, select?: SelectShape) {
+function applySelect<T extends Record<string, any>>(
+  item: T,
+  select?: SelectShape,
+) {
   if (!select) return { ...item };
 
   if (
@@ -56,7 +59,10 @@ function applySelect<T extends Record<string, any>>(item: T, select?: SelectShap
     select !== null &&
     Object.prototype.hasOwnProperty.call(select, "select")
   ) {
-    return applySelect(item, (select as Record<string, any>).select as SelectShape);
+    return applySelect(
+      item,
+      (select as Record<string, any>).select as SelectShape,
+    );
   }
 
   const result: Record<string, any> = {};
@@ -65,7 +71,10 @@ function applySelect<T extends Record<string, any>>(item: T, select?: SelectShap
     if (typeof value === "object" && value) {
       const nested = item[key as keyof T];
       if (nested && typeof nested === "object") {
-        result[key] = applySelect(nested as Record<string, any>, value as SelectShape);
+        result[key] = applySelect(
+          nested as Record<string, any>,
+          value as SelectShape,
+        );
       }
       continue;
     }
@@ -89,7 +98,10 @@ function matchesWhere(order: MockOrder, where?: OrderWhere): boolean {
     if (!andMatches) return false;
   }
 
-  if (Object.prototype.hasOwnProperty.call(where, "id") && order.id !== where.id)
+  if (
+    Object.prototype.hasOwnProperty.call(where, "id") &&
+    order.id !== where.id
+  )
     return false;
   if (
     Object.prototype.hasOwnProperty.call(where, "offerId") &&
@@ -115,7 +127,10 @@ function matchesWhere(order: MockOrder, where?: OrderWhere): boolean {
   return true;
 }
 
-function sortOrders(orders: MockOrder[], orderBy?: { createdAt?: "asc" | "desc" }) {
+function sortOrders(
+  orders: MockOrder[],
+  orderBy?: { createdAt?: "asc" | "desc" },
+) {
   if (!orderBy || !orderBy.createdAt) return orders;
   const direction = orderBy.createdAt === "desc" ? -1 : 1;
   return [...orders].sort((a, b) => {
@@ -126,7 +141,11 @@ function sortOrders(orders: MockOrder[], orderBy?: { createdAt?: "asc" | "desc" 
 
 export const mockPrisma = {
   order: {
-    findMany: async (options?: { where?: OrderWhere; orderBy?: any; select?: SelectShape }) => {
+    findMany: async (options?: {
+      where?: OrderWhere;
+      orderBy?: any;
+      select?: SelectShape;
+    }) => {
       console.log("[MOCK] order.findMany called with:", options);
       const where = options?.where;
       const orderBy = options?.orderBy;
@@ -140,19 +159,29 @@ export const mockPrisma = {
 
       return orders.map((order) => applySelect(order, select));
     },
-    findFirst: async (options?: { where?: OrderWhere; orderBy?: any; select?: SelectShape }) => {
+    findFirst: async (options?: {
+      where?: OrderWhere;
+      orderBy?: any;
+      select?: SelectShape;
+    }) => {
       console.log("[MOCK] order.findFirst called with:", options);
       const results = await mockPrisma.order.findMany(options);
       return results.length ? results[0] : null;
     },
-    findUnique: async (options?: { where?: { id?: string }; select?: SelectShape }) => {
+    findUnique: async (options?: {
+      where?: { id?: string };
+      select?: SelectShape;
+    }) => {
       console.log("[MOCK] order.findUnique called with:", options);
       const id = options?.where?.id;
       if (!id) return null;
       const order = mockStorage.orders.get(id) || null;
       return order ? applySelect(order, options?.select) : null;
     },
-    create: async (options?: { data?: Partial<MockOrder>; select?: SelectShape }) => {
+    create: async (options?: {
+      data?: Partial<MockOrder>;
+      select?: SelectShape;
+    }) => {
       console.log("[MOCK] order.create called with:", options);
       const data = options?.data ?? {};
       const timestamp = nowIso();
@@ -164,12 +193,18 @@ export const mockPrisma = {
           ? (data.takerAddress ?? null)
           : null,
         status: data.status || "created",
-        priceTON: Number.isFinite(data.priceTON as number) ? (data.priceTON as number) : 0,
-        nPercent: Number.isFinite(data.nPercent as number) ? (data.nPercent as number) : 0,
+        priceTON: Number.isFinite(data.priceTON as number)
+          ? (data.priceTON as number)
+          : 0,
+        nPercent: Number.isFinite(data.nPercent as number)
+          ? (data.nPercent as number)
+          : 0,
         makerDeposit: Number.isFinite(data.makerDeposit as number)
           ? (data.makerDeposit as number)
           : 0,
-        takerStake: Number.isFinite(data.takerStake as number) ? (data.takerStake as number) : 0,
+        takerStake: Number.isFinite(data.takerStake as number)
+          ? (data.takerStake as number)
+          : 0,
         offerId: data.offerId ?? null,
         createdAt: data.createdAt || timestamp,
         updatedAt: data.updatedAt || timestamp,
@@ -181,7 +216,11 @@ export const mockPrisma = {
       mockStorage.orders.set(order.id, order);
       return applySelect(order, options?.select);
     },
-    update: async (options?: { where?: { id?: string }; data?: Partial<MockOrder>; select?: SelectShape }) => {
+    update: async (options?: {
+      where?: { id?: string };
+      data?: Partial<MockOrder>;
+      select?: SelectShape;
+    }) => {
       console.log("[MOCK] order.update called with:", options);
       const id = options?.where?.id;
       if (!id) {
@@ -209,7 +248,8 @@ export const mockPrisma = {
       console.log("[MOCK] message.findMany called with:", options);
       const messages = Array.from(mockStorage.messages.values());
       return messages.filter(
-        (message) => !options?.where?.orderId || message.orderId === options.where.orderId,
+        (message) =>
+          !options?.where?.orderId || message.orderId === options.where.orderId,
       );
     },
     create: async (options?: any) => {
@@ -271,7 +311,9 @@ export const mockPrisma = {
   user: {
     findUnique: async (options?: any) => {
       console.log("[MOCK] user.findUnique called with:", options);
-      const user = mockStorage.users.get(options?.where?.address || options?.where?.id);
+      const user = mockStorage.users.get(
+        options?.where?.address || options?.where?.id,
+      );
       return user || null;
     },
     upsert: async (options?: any) => {
