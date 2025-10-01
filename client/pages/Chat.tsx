@@ -73,45 +73,101 @@ export default function Chat() {
   }
 
   async function openSelfChat() {
-    if (!addr) return;
+    console.log("=== openSelfChat started ===");
+    console.log("addr:", addr);
+
+    if (!addr) {
+      console.log("❌ No address, returning");
+      return;
+    }
+
+    // Попытка 1: Создать self-chat через API
+    console.log("🔄 Attempt 1: Creating self-chat via API");
     try {
       const r = await fetch(`/api/chat/self`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address: addr }),
       });
-      const j = await r.json().catch(() => ({}));
+      console.log("📡 API Response status:", r.status);
+
+      const j = await r.json().catch((e) => {
+        console.log("❌ JSON parse error:", e);
+        return {};
+      });
+
+      console.log("📦 API Response data:", j);
+      console.log("🔍 Checking for order ID...");
+      console.log("j?.order:", j?.order);
+      console.log("j?.order?.id:", j?.order?.id);
+
       const id = String(j?.order?.id || "");
+      console.log("📝 Extracted ID:", id);
+
       if (id) {
+        console.log("✅ Success! Navigating to chat with ID:", id);
         navigate(`/chat/${id}?peer=${encodeURIComponent(addr)}`);
         return;
+      } else {
+        console.log("❌ No ID found in API response");
       }
-    } catch {}
+    } catch (error) {
+      console.log("❌ API call failed:", error);
+    }
+
+    // Попытка 2: Поиск в локальных данных
+    console.log("🔄 Attempt 2: Searching in local items");
+    console.log("items array:", items);
 
     const localSelf = items.find(
       (i) => i.makerAddress === addr && i.takerAddress === addr,
     );
+    console.log("🔍 Found local self-chat:", localSelf);
+
     if (localSelf) {
+      console.log("✅ Success! Navigating with local ID:", localSelf.id);
       navigate(`/chat/${localSelf.id}?peer=${encodeURIComponent(addr)}`);
       return;
+    } else {
+      console.log("❌ No local self-chat found");
     }
 
+    // Попытка 3: Поиск через API orders
+    console.log("🔄 Attempt 3: Searching via orders API");
     try {
       const rr = await fetch(
         `/api/orders?address=${encodeURIComponent(addr)}&role=any`,
       );
-      const jj = await rr.json().catch(() => ({}));
+      console.log("📡 Orders API Response status:", rr.status);
+
+      const jj = await rr.json().catch((e) => {
+        console.log("❌ Orders JSON parse error:", e);
+        return {};
+      });
+
+      console.log("📦 Orders API Response data:", jj);
+
       const list = (jj.items || []) as any[];
+      console.log("📋 Orders list:", list);
+
       const found = list.find(
         (o: any) =>
           String(o.makerAddress) === addr && String(o.takerAddress) === addr,
       );
+      console.log("🔍 Found self-order:", found);
+
       if (found?.id) {
+        console.log("✅ Success! Navigating with order ID:", found.id);
         navigate(`/chat/${String(found.id)}?peer=${encodeURIComponent(addr)}`);
         return;
+      } else {
+        console.log("❌ No self-order found in orders API");
       }
-    } catch {}
+    } catch (error) {
+      console.log("❌ Orders API call failed:", error);
+    }
 
+    console.log("💥 All attempts failed!");
     alert(
       "Не удалось открыть Favorites. Подключите кошелек и попробуйте снова.",
     );
