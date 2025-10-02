@@ -131,6 +131,9 @@ export default function Chat() {
     } else {
       console.log("❌ No local self-chat found");
     }
+  } catch (error) {
+    console.log("❌ API call failed:", error);
+  }
 
     // Попытка 3: Поиск через API orders
     console.log("🔄 Attempt 3: Searching via orders API");
@@ -171,7 +174,24 @@ export default function Chat() {
     alert(
       "Не удалось открыть Favorites. Подключите кошелек и попробуйте снова.",
     );
+    console.log("🔍 Found self-order:", found);
+    
+    if (found?.id) {
+      console.log("✅ Success! Navigating with order ID:", found.id);
+      navigate(`/chat/${String(found.id)}?peer=${encodeURIComponent(addr)}`);
+      return;
+    } else {
+      console.log("❌ No self-order found in orders API");
+    }
+  } catch (error) {
+    console.log("❌ Orders API call failed:", error);
   }
+
+  console.log("💥 All attempts failed!");
+  alert(
+    "Не удалось открыть Favorites. Подключите кошелек и попробуйте снова.",
+  );
+}
 
   function openChat(o: Order) {
     const peer = getPeerForOrder(o, addr);
