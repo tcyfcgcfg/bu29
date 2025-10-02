@@ -148,7 +148,9 @@ export default function Chat() {
       return;
     }
 
-    alert("Не удалось открыть Favorites. Подключите кошелек и попробуйте снова.");
+    alert(
+      "Не удалось открыть Favorites. Подключите кошелек и попробуйте снова.",
+    );
   }
 
   function openChat(o: Order) {
