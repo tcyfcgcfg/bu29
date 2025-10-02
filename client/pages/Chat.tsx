@@ -132,7 +132,8 @@ export default function Chat() {
 
       const list = (jj.items || []) as any[];
       const found = list.find(
-        (o: any) => String(o.makerAddress) === addr && String(o.takerAddress) === addr,
+        (o: any) =>
+          String(o.makerAddress) === addr && String(o.takerAddress) === addr,
       );
 
       if (found?.id) {
@@ -145,7 +146,9 @@ export default function Chat() {
     }
 
     console.log("💥 All attempts failed!");
-    alert("Не удалось открыть Favorites. Подключите кошелек и попробуйте снова.");
+    alert(
+      "Не удалось открыть Favorites. Подключите кошелек и попробуйте снова.",
+    );
   }
 
   function openChat(o: Order) {
