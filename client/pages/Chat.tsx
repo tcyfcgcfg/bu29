@@ -81,7 +81,7 @@ export default function Chat() {
       return;
     }
 
-    // Попытка 1: Создать self-chat через API
+    // Attempt 1: create self-chat via API
     console.log("🔄 Attempt 1: Creating self-chat via API");
     try {
       const r = await fetch(`/api/chat/self`, {
@@ -93,49 +93,31 @@ export default function Chat() {
 
       const j = await r.json().catch((e) => {
         console.log("❌ JSON parse error:", e);
-        return {};
+        return {} as any;
       });
 
-      console.log("📦 API Response data:", j);
-      console.log("🔍 Checking for order ID...");
-      console.log("j?.order:", j?.order);
-      console.log("j?.order?.id:", j?.order?.id);
-
       const id = String(j?.order?.id || "");
-      console.log("📝 Extracted ID:", id);
-
       if (id) {
         console.log("✅ Success! Navigating to chat with ID:", id);
         navigate(`/chat/${id}?peer=${encodeURIComponent(addr)}`);
         return;
-      } else {
-        console.log("❌ No ID found in API response");
       }
     } catch (error) {
       console.log("❌ API call failed:", error);
     }
 
-    // Попытка 2: Поиск в локальных данных
+    // Attempt 2: search local items
     console.log("🔄 Attempt 2: Searching in local items");
-    console.log("items array:", items);
-
     const localSelf = items.find(
       (i) => i.makerAddress === addr && i.takerAddress === addr,
     );
-    console.log("🔍 Found local self-chat:", localSelf);
-
     if (localSelf) {
       console.log("✅ Success! Navigating with local ID:", localSelf.id);
       navigate(`/chat/${localSelf.id}?peer=${encodeURIComponent(addr)}`);
       return;
-    } else {
-      console.log("❌ No local self-chat found");
     }
-  } catch (error) {
-    console.log("❌ API call failed:", error);
-  }
 
-    // Попытка 3: Поиск через API orders
+    // Attempt 3: search via orders API
     console.log("🔄 Attempt 3: Searching via orders API");
     try {
       const rr = await fetch(
@@ -145,26 +127,19 @@ export default function Chat() {
 
       const jj = await rr.json().catch((e) => {
         console.log("❌ Orders JSON parse error:", e);
-        return {};
+        return {} as any;
       });
 
-      console.log("📦 Orders API Response data:", jj);
-
       const list = (jj.items || []) as any[];
-      console.log("📋 Orders list:", list);
-
       const found = list.find(
         (o: any) =>
           String(o.makerAddress) === addr && String(o.takerAddress) === addr,
       );
-      console.log("🔍 Found self-order:", found);
 
       if (found?.id) {
         console.log("✅ Success! Navigating with order ID:", found.id);
         navigate(`/chat/${String(found.id)}?peer=${encodeURIComponent(addr)}`);
         return;
-      } else {
-        console.log("❌ No self-order found in orders API");
       }
     } catch (error) {
       console.log("❌ Orders API call failed:", error);
@@ -174,24 +149,7 @@ export default function Chat() {
     alert(
       "Не удалось открыть Favorites. Подключите кошелек и попробуйте снова.",
     );
-    console.log("🔍 Found self-order:", found);
-    
-    if (found?.id) {
-      console.log("✅ Success! Navigating with order ID:", found.id);
-      navigate(`/chat/${String(found.id)}?peer=${encodeURIComponent(addr)}`);
-      return;
-    } else {
-      console.log("❌ No self-order found in orders API");
-    }
-  } catch (error) {
-    console.log("❌ Orders API call failed:", error);
   }
-
-  console.log("💥 All attempts failed!");
-  alert(
-    "Не удалось открыть Favorites. Подключите кошелек и попробуйте снова.",
-  );
-}
 
   function openChat(o: Order) {
     const peer = getPeerForOrder(o, addr);
